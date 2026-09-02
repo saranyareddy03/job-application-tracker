@@ -433,7 +433,7 @@ def send_email(to_email, subject, body):
 
         data = json.dumps({
             "from": from_email,
-            "to": [to_email],
+            "to": ["nallimillisaranyareddy@gmail.com"],
             "subject": subject,
             "text": body
         }).encode("utf-8")
