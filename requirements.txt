@@ -1,4 +1,5 @@
 Flask
 mysql-connector-python
-flask-bcrypt
 python-dotenv
+Werkzeug
+gunicorn

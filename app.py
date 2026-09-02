@@ -1663,7 +1663,7 @@ if __name__ == "__main__":
         ).start()
 
     app.run(
-        debug=True,
+        debug=False,
         host="0.0.0.0",
-        port=5001
+        port=int(os.getenv("PORT", 5001))
     )
