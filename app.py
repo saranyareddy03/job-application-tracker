@@ -433,7 +433,7 @@ def send_email(to_email, subject, body):
 
         data = json.dumps({
             "from": from_email,
-            "to":["delivered@resend.dev"],
+            "to": ["delivered@resend.dev"],
             "subject": subject,
             "text": body
         }).encode("utf-8")
@@ -443,25 +443,25 @@ def send_email(to_email, subject, body):
             data=data,
             headers={
                 "Authorization": f"Bearer {resend_api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "User-Agent": "job-application-tracker/1.0"
             },
             method="POST"
         )
 
         with urllib.request.urlopen(req, timeout=20) as response:
             print("Resend Email Response:", response.read().decode())
-        
+
         return True
 
     except urllib.error.HTTPError as e:
         print("Resend Error Status:", e.code)
         print("Resend Error Details:", e.read().decode())
         return False
-    
+
     except Exception as e:
         print("Resend Error:", e)
         return False
-
 
 def sendInterviewReminder(to_email, company, role, interview, reminder_label):
     when = str(interview.get("interview_date"))
