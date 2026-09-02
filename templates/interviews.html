@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Interviews - JobTrack{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div><h1>Interviews</h1><p>Schedule interviews from applications you have already added.</p></div>
+</div>
+
+{% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+<div class="two-column">
+    <div class="form-card">
+        <h3>Schedule Interview</h3>
+        <p class="muted">Choose an existing application — no need to enter the company again.</p>
+        {% if applications %}
+        <form method="POST" id="interviewForm">
+            <div class="form-group">
+                <label>Application *</label>
+                <div class="search-select">
+                    <input type="text" id="applicationSearch" class="form-control" placeholder="Search company or job role..." autocomplete="off">
+                    <select name="application_id" id="applicationSelect" required size="1">
+                        <option value="">Select an application</option>
+                        {% for a in applications %}
+                        <option value="{{ a.id }}" {% if selected_application == a.id %}selected{% endif %}>{{ a.company_name }} — {{ a.job_role }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <small class="muted">Start typing to find an application.</small>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Round *</label>
+                    <select name="round_number" required>
+                        <option value="">Select round</option>
+                        <option>Round 1</option><option>Round 2</option><option>Round 3</option><option>Final</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Round Name *</label>
+                    <input name="interview_round" required placeholder="Technical / HR / Managerial">
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" name="interview_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Time *</label>
+                    <input type="time" name="interview_time" required>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select name="interview_type">
+                        <option value="">Select type</option><option>Online</option><option>In-person</option><option>Phone</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input name="location" placeholder="Hyderabad / Remote">
+                </div>
+                <div class="form-group full">
+                    <label>Meeting Link</label>
+                    <input type="url" name="meeting_link" placeholder="https://meet.google.com/...">
+                </div>
+                <div class="form-group full">
+                    <label>Notes</label>
+                    <textarea name="notes" rows="4" placeholder="Preparation notes, interviewer name, topics to revise..."></textarea>
+                </div>
+            </div>
+            <div class="reminder-box"><i class="bi bi-bell"></i><div><strong>Automatic reminders</strong><span>Email reminders will be sent 1 day and 1 hour before the interview.</span></div></div>
+            <button class="btn add-job-btn" type="submit"><i class="bi bi-calendar-plus"></i> Schedule Interview</button>
+        </form>
+        {% else %}
+        <div class="empty-small"><p>Add an application first before scheduling an interview.</p><a href="{{ url_for('add_application') }}" class="btn add-job-btn">Add Application</a></div>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-header"><div><h3>Scheduled Interviews</h3><p>Your upcoming and past interview records.</p></div></div>
+        {% if interviews %}
+        <div class="interview-list">
+            {% for i in interviews %}
+            <div class="interview-item">
+                <div class="calendar-icon"><i class="bi bi-calendar-event"></i></div>
+                <div class="interview-main">
+                    <strong>{{ i.company_name }}</strong>
+                    <span>{{ i.job_role }}</span>
+                    <small>{{ i.round_number or 'Interview' }}{% if i.interview_round %} · {{ i.interview_round }}{% endif %}</small>
+                    <small><i class="bi bi-calendar3"></i> {{ i.interview_date }} · {{ i.interview_time }}</small>
+                    {% if i.location %}<small><i class="bi bi-geo-alt"></i> {{ i.location }}</small>{% endif %}
+                </div>
+                {% if i.meeting_link %}<a class="icon-btn" href="{{ i.meeting_link }}" target="_blank" rel="noopener" title="Open meeting"><i class="bi bi-box-arrow-up-right"></i></a>{% endif %}
+                <form method="POST" action="{{ url_for('delete_interview', id=i.id) }}" onsubmit="return confirm('Delete this interview?');"><button class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></button></form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}<div class="empty-state"><div class="empty-icon"><i class="bi bi-calendar3"></i></div><h4>No interviews yet</h4><p>Schedule your first interview above.</p></div>{% endif %}
+    </div>
+</div>
+
+<script>
+(function(){
+    const search = document.getElementById('applicationSearch');
+    const select = document.getElementById('applicationSelect');
+    if (!search || !select) return;
+    search.addEventListener('input', function(){
+        const q = this.value.toLowerCase().trim();
+        Array.from(select.options).forEach((opt, index) => {
+            if (index === 0) return;
+            const match = opt.text.toLowerCase().includes(q);
+            opt.hidden = !match;
+        });
+        if (q) select.focus();
+    });
+    select.addEventListener('change', function(){
+        if (this.selectedIndex > 0) search.value = this.options[this.selectedIndex].text;
+    });
+    if (select.value) search.value = select.options[select.selectedIndex].text;
+})();
+</script>
+{% endblock %}

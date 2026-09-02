@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Application Details - JobTrack{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ application.company_name }}</h1>
+        <p>{{ application.job_role }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('edit_application', id=application.id) }}" class="btn add-job-btn">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <a href="{{ url_for('applications') }}" class="btn btn-clear">Back</a>
+    </div>
+</div>
+
+<div class="detail-card">
+    <div class="detail-top">
+        <div class="company-symbol">{{ application.company_name[0]|upper }}</div>
+        <div>
+            <h2>{{ application.job_role }}</h2>
+            <p>{{ application.company_name }}{% if application.location %} · {{ application.location }}{% endif %}</p>
+        </div>
+        <span class="status status-{{ application.status|lower|replace(' ','-') }}">{{ application.status }}</span>
+    </div>
+
+    <div class="detail-grid">
+        <div><span>Job Type</span><strong>{{ application.job_type or '-' }}</strong></div>
+        <div><span>Applied Date</span><strong>{{ application.applied_date or '-' }}</strong></div>
+        <div><span>Salary</span><strong>{{ application.salary or '-' }}</strong></div>
+        <div><span>Added</span><strong>{{ application.created_at }}</strong></div>
+    </div>
+
+    <div class="detail-section">
+        <h3>Job Link</h3>
+        {% if application.job_url %}
+        <a href="{{ application.job_url }}" target="_blank" rel="noopener">
+            Open job posting <i class="bi bi-box-arrow-up-right"></i>
+        </a>
+        {% else %}
+        <p>No job URL added.</p>
+        {% endif %}
+    </div>
+
+    <div class="detail-section">
+        <h3>Resume</h3>
+        {% if application.resume_file %}
+        <div class="resume-attachment">
+            <div class="resume-file-icon"><i class="bi bi-file-earmark-pdf"></i></div>
+            <div>
+                <strong>Resume attached</strong>
+                <span>Resume saved with this application.</span>
+            </div>
+            <a href="{{ url_for('download_resume', id=application.id) }}" class="btn btn-secondary">
+                <i class="bi bi-download"></i> Download
+            </a>
+        </div>
+        {% else %}
+        <div class="resume-empty">
+            <i class="bi bi-paperclip"></i>
+            <span>No resume attached to this application.</span>
+            <a href="{{ url_for('edit_application', id=application.id) }}">Attach one</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="detail-section">
+        <h3>Notes</h3>
+        <p class="notes-text">{{ application.notes or 'No notes added.' }}</p>
+    </div>
+
+    <div class="detail-delete">
+        <form method="POST" action="{{ url_for('delete_application', id=application.id) }}"
+              onsubmit="return confirm('Delete this application?');">
+            <button class="btn btn-danger-soft">
+                <i class="bi bi-trash"></i> Delete Application
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

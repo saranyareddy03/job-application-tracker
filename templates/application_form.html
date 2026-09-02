@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - JobTrack{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ title }}</h1>
+        <p>{{ subtitle }}</p>
+    </div>
+    <a href="{{ url_for('applications') }}" class="btn btn-clear">Cancel</a>
+</div>
+
+<div class="form-card">
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Company name *</label>
+                <input name="company_name" value="{{ application.get('company_name','') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Job role *</label>
+                <input name="job_role" value="{{ application.get('job_role','') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Location</label>
+                <input name="location" value="{{ application.get('location','') }}" placeholder="Hyderabad / Remote">
+            </div>
+
+            <div class="form-group">
+                <label>Job type</label>
+                <select name="job_type">
+                    <option value="">Select job type</option>
+                    {% for x in ['Full-time','Part-time','Internship','Contract','Freelance'] %}
+                    <option value="{{ x }}" {% if application.get('job_type') == x %}selected{% endif %}>{{ x }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Applied date</label>
+                <input type="date" name="applied_date" value="{{ application.get('applied_date') or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    {% for x in ['Applied','Interview','Selected','Rejected','Withdrawn'] %}
+                    <option value="{{ x }}" {% if application.get('status','Applied') == x %}selected{% endif %}>{{ x }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Salary</label>
+                <input name="salary" value="{{ application.get('salary','') }}" placeholder="e.g. ₹6 LPA">
+            </div>
+
+            <div class="form-group">
+                <label>Job URL</label>
+                <input type="url" name="job_url" value="{{ application.get('job_url','') }}" placeholder="https://...">
+            </div>
+
+            <div class="form-group full">
+                <label>Resume <span class="muted">(optional)</span></label>
+                <input type="file" name="resume_file" accept=".pdf,.doc,.docx">
+                <small class="muted">Attach the resume used for this application. PDF, DOC or DOCX, maximum 5 MB.</small>
+
+                {% if application.get('resume_file') %}
+                <div class="resume-existing">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Resume already attached</span>
+                    <a href="{{ url_for('download_resume', id=application.id) }}">Download</a>
+                    {% if application.id %}
+                    <label class="resume-remove">
+                        <input type="checkbox" name="remove_resume" value="1">
+                        Remove existing resume
+                    </label>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group full">
+                <label>Notes</label>
+                <textarea name="notes" rows="6" placeholder="Add your notes about this application...">{{ application.get('notes','') }}</textarea>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <div class="form-actions">
+            <a href="{{ url_for('applications') }}" class="btn btn-clear">Cancel</a>
+            <button type="submit" class="btn add-job-btn">{{ button_text }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

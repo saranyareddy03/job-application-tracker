@@ -1,0 +1,65 @@
+{% extends "base.html" %}{% block title %}Applications - JobTrack{% endblock %}{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Applications</h1>
+        <p>Manage every job application in one place.</p>
+    </div><a href="{{ url_for('add_application') }}" class="btn add-job-btn"><i class="bi bi-plus-lg"></i> Add
+        Application</a>
+</div>
+<div class="filter-card">
+    <form method="GET" class="filter-form">
+        <div class="search-box"><i class="bi bi-search"></i><input name="search" value="{{ search }}"
+                placeholder="Search company or job role"></div><select name="status">
+            <option value="">All statuses</option>{% for s in ['Applied','Interview','Selected','Rejected','Withdrawn']
+            %}<option value="{{ s }}" {% if selected_status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select><select name="job_type">
+            <option value="">All job types</option>{% for t in
+            ['Full-time','Part-time','Internship','Contract','Freelance'] %}<option value="{{ t }}" {% if
+                selected_job_type==t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select><button class="btn btn-filter">Filter</button><a href="{{ url_for('applications') }}"
+            class="btn btn-clear">Clear</a>
+    </form>
+</div>
+<div class="dashboard-card">
+    <div class="card-header">
+        <div>
+            <h3>My Applications</h3>
+            <p>{{ applications|length }} application{% if applications|length != 1 %}s{% endif %} shown</p>
+        </div>
+    </div>{% if applications %}<div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Location</th>
+                    <th>Applied</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>{% for a in applications %}<tr>
+                    <td><strong>{{ a.company_name }}</strong></td>
+                    <td>{{ a.job_role }}</td>
+                    <td>{{ a.location or '-' }}</td>
+                    <td>{{ a.applied_date or '-' }}</td>
+                    <td><span class="status status-{{ a.status|lower|replace(' ','-') }}">{{ a.status }}</span></td>
+                    <td class="actions"><a class="icon-btn" title="View"
+                            href="{{ url_for('view_application', id=a.id) }}"><i
+                                class="bi bi-eye"></i></a><a class="icon-btn" title="Edit"
+                            href="{{ url_for('edit_application', id=a.id) }}"><i
+                                class="bi bi-pencil"></i></a>
+                        <form method="POST" action="{{ url_for('delete_application',id=a.id) }}"
+                            onsubmit="return confirm('Delete this application?');"><button class="icon-btn danger"
+                                title="Delete"><i class="bi bi-trash"></i></button></form>
+                    </td>
+                </tr>{% endfor %}</tbody>
+        </table>
+    </div>{% else %}<div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-briefcase"></i></div>
+        <h4>No applications found</h4>
+        <p>Your real applications will appear here after you add them.</p><a href="{{ url_for('add_application') }}"
+            class="btn add-job-btn">Add Application</a>
+    </div>{% endif %}
+</div>
+{% endblock %}
