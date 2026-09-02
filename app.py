@@ -12,6 +12,7 @@ from uuid import uuid4
 from werkzeug.utils import secure_filename
 from flask_bcrypt import Bcrypt
 from config import Config
+from zoneinfo import ZoneInfo
 
 
 # =========================================================
@@ -111,14 +112,12 @@ def ensureDatabaseColumns():
 def get_user(user_id):
     return readUserRecordById({"id": user_id})
 
-
 def allowed_resume(filename):
     return (
         bool(filename)
         and "." in filename
         and filename.rsplit(".", 1)[1].lower() in ALLOWED_RESUME_EXTENSIONS
     )
-
 
 def save_resume(file):
     if not file or not file.filename:
@@ -137,7 +136,6 @@ def save_resume(file):
         print("Resume Save Error:", e)
         return None, "The resume could not be saved."
 
-
 def delete_resume_file(filename):
     if not filename:
         return
@@ -148,7 +146,6 @@ def delete_resume_file(filename):
             os.remove(path)
     except OSError as e:
         print("Resume Delete Error:", e)
-
 
 def normalize_interview_time(value):
     """
@@ -179,18 +176,20 @@ def normalize_interview_time(value):
 
     return None
 
-
 def combine_interview_datetime(interview_date, interview_time):
     if isinstance(interview_date, datetime):
         interview_date = interview_date.date()
 
     normalized_time = normalize_interview_time(interview_time)
+
     if interview_date is None or normalized_time is None:
         return None
 
-    return datetime.combine(interview_date, normalized_time)
-
-
+    return datetime.combine(
+        interview_date,
+        normalized_time,
+        tzinfo=ZoneInfo("Asia/Kolkata")
+    )
 # =========================================================
 # USER FUNCTIONS
 # =========================================================
@@ -225,7 +224,6 @@ def insertUserRecord(user_data):
         connection.close()
         return False
 
-
 def readUserRecordByEmail(user_data):
     connection = getConnectionWithDB()
     if connection is None:
@@ -252,7 +250,6 @@ def readUserRecordByEmail(user_data):
         connection.close()
         return False
 
-
 def readUserRecordById(user_data):
     connection = getConnectionWithDB()
     if connection is None:
@@ -278,7 +275,6 @@ def readUserRecordById(user_data):
         cursor.close()
         connection.close()
         return False
-
 
 def updateNameByIdorEmail(user_data):
     connection = getConnectionWithDB()
@@ -308,7 +304,6 @@ def updateNameByIdorEmail(user_data):
         connection.close()
         return False
 
-
 def updatePasswordByIdorEmail(user_data):
     connection = getConnectionWithDB()
     if connection is None:
@@ -337,7 +332,6 @@ def updatePasswordByIdorEmail(user_data):
         connection.close()
         return False
 
-
 def store_reset_otp(email, otp_hash, expires_at):
     connection = getConnectionWithDB()
     if connection is None:
@@ -363,7 +357,6 @@ def store_reset_otp(email, otp_hash, expires_at):
         cursor.close()
         connection.close()
         return False
-
 
 def clear_reset_otp(email):
     connection = getConnectionWithDB()
@@ -1608,7 +1601,7 @@ def processInterviewReminders():
         )
 
         rows = cursor.fetchall()
-        now = datetime.now()
+        now = datetime.now(ZoneInfo("Asia/Kolkata"))
 
         for row in rows:
             interview_dt = combine_interview_datetime(
@@ -1696,6 +1689,7 @@ def file_too_large(error):
 # =========================================================
 # START
 # =========================================================
+
 # Start database setup when the application is loaded
 ensureDatabaseColumns()
 
