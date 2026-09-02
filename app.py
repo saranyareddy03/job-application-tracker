@@ -428,6 +428,7 @@ def send_email(to_email, subject, body):
 
     try:
         import urllib.request
+        import urllib.error
         import json
 
         data = json.dumps({
@@ -452,10 +453,14 @@ def send_email(to_email, subject, body):
         
         return True
 
+    except urllib.error.HTTPError as e:
+        print("Resend Error Status:", e.code)
+        print("Resend Error Details:", e.read().decode())
+        return False
+    
     except Exception as e:
         print("Resend Error:", e)
         return False
-
 
 
 def sendInterviewReminder(to_email, company, role, interview, reminder_label):
