@@ -395,28 +395,67 @@ def clear_reset_otp(email):
 # EMAIL
 # =========================================================
 
+# def send_email(to_email, subject, body):
+#     from_email = os.getenv("FROM_EMAIL", "").strip()
+#     app_password = os.getenv("EMAIL_APP_PASSWORD", "").strip()
+
+#     if not from_email or not app_password or not to_email:
+#         print("Email Error: FROM_EMAIL, EMAIL_APP_PASSWORD, and recipient are required.")
+#         return False
+
+#     message = EmailMessage()
+#     message["Subject"] = subject
+#     message["From"] = from_email
+#     message["To"] = to_email
+#     message.set_content(body)
+
+#     try:
+#         with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as server:
+#             server.login(from_email, app_password)
+#             server.send_message(message)
+#         return True
+#     except Exception as e:
+#         print("Gmail Error:", e)
+#         return False
+
 def send_email(to_email, subject, body):
+    resend_api_key = os.getenv("RESEND_API_KEY", "").strip()
     from_email = os.getenv("FROM_EMAIL", "").strip()
-    app_password = os.getenv("EMAIL_APP_PASSWORD", "").strip()
 
-    if not from_email or not app_password or not to_email:
-        print("Email Error: FROM_EMAIL, EMAIL_APP_PASSWORD, and recipient are required.")
+    if not resend_api_key or not from_email or not to_email:
+        print("Email Error: RESEND_API_KEY, FROM_EMAIL, and recipient are required.")
         return False
-
-    message = EmailMessage()
-    message["Subject"] = subject
-    message["From"] = from_email
-    message["To"] = to_email
-    message.set_content(body)
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as server:
-            server.login(from_email, app_password)
-            server.send_message(message)
+        import urllib.request
+        import json
+
+        data = json.dumps({
+            "from": from_email,
+            "to": [to_email],
+            "subject": subject,
+            "text": body
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=data,
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+
+        with urllib.request.urlopen(req, timeout=20) as response:
+            print("Resend Email Response:", response.read().decode())
+        
         return True
+
     except Exception as e:
-        print("Gmail Error:", e)
+        print("Resend Error:", e)
         return False
+
 
 
 def sendInterviewReminder(to_email, company, role, interview, reminder_label):
