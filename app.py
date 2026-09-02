@@ -1696,16 +1696,18 @@ def file_too_large(error):
 # =========================================================
 # START
 # =========================================================
+# Start database setup when the application is loaded
+ensureDatabaseColumns()
 
+# Start the interview reminder worker
+threading.Thread(
+    target=reminder_worker,
+    daemon=True
+).start()
+
+
+# Run Flask locally
 if __name__ == "__main__":
-    ensureDatabaseColumns()
-
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not app.debug:
-        threading.Thread(
-            target=reminder_worker,
-            daemon=True
-        ).start()
-
     app.run(
         debug=False,
         host="0.0.0.0",
