@@ -1581,6 +1581,7 @@ def change_password():
 def processInterviewReminders():
     connection = getConnectionWithDB()
     if connection is None:
+        print("REMINDER: Database connection failed")
         return
 
     try:
@@ -1603,16 +1604,31 @@ def processInterviewReminders():
         rows = cursor.fetchall()
         now = datetime.now(ZoneInfo("Asia/Kolkata"))
 
+        print("REMINDER CHECK RUNNING")
+        print("Interviews found:", len(rows))
+        print("Current IST time:", now)
+
         for row in rows:
+            print(
+                "Checking interview:",
+                row.get("company_name"),
+                row.get("interview_date"),
+                row.get("interview_time")
+            )
+
             interview_dt = combine_interview_datetime(
                 row.get("interview_date"),
                 row.get("interview_time")
             )
 
             if interview_dt is None:
+                print("Interview datetime could not be created")
                 continue
 
             seconds_until = (interview_dt - now).total_seconds()
+
+            print("Interview datetime:", interview_dt)
+            print("Seconds until interview:", seconds_until)
 
             field = None
             label = None
@@ -1632,6 +1648,8 @@ def processInterviewReminders():
                 label = "1 hour"
 
             if field:
+                print("Sending reminder:", label, "to", row["email"])
+
                 sent = sendInterviewReminder(
                     row["email"],
                     row["company_name"],
@@ -1639,6 +1657,8 @@ def processInterviewReminders():
                     row,
                     label
                 )
+
+                print("Reminder email sent:", sent)
 
                 if sent:
                     cursor.execute(
@@ -1659,6 +1679,7 @@ def processInterviewReminders():
             pass
 
 
+        
 def reminder_worker():
     while True:
         try:
