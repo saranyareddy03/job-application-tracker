@@ -433,7 +433,7 @@ def send_email(to_email, subject, body):
 
         data = json.dumps({
             "from": from_email,
-            "to": ["delivered@resend.dev"],
+            "to": [to_email],
             "subject": subject,
             "text": body
         }).encode("utf-8")
@@ -462,7 +462,7 @@ def send_email(to_email, subject, body):
     except Exception as e:
         print("Resend Error:", e)
         return False
-
+    
 def sendInterviewReminder(to_email, company, role, interview, reminder_label):
     when = str(interview.get("interview_date"))
     normalized_time = normalize_interview_time(interview.get("interview_time"))
